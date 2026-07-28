@@ -1,0 +1,28 @@
+﻿{
+  "unit_name": "simulated_money_unit",
+  "description": "Assumptions for utility-based policy evaluation. These are not real bank costs; they are scenario parameters for sensitivity analysis.",
+  "base": {
+    "fraud_recovery_rate": 0.75,
+    "false_positive_fixed_cost": 3.0,
+    "false_positive_variable_rate": 0.01,
+    "analyst_cost_per_minute": 0.45,
+    "review_minutes_high_risk": 9.0,
+    "review_minutes_medium_risk": 6.0
+  },
+  "sensitivity_scenarios": {
+    "base_cost": {},
+    "high_false_positive_cost": {
+      "false_positive_fixed_cost": 6.0,
+      "false_positive_variable_rate": 0.02
+    },
+    "high_analyst_cost": {
+      "analyst_cost_per_minute": 0.9
+    },
+    "low_recovery": {
+      "fraud_recovery_rate": 0.4
+    },
+    "high_recovery": {
+      "fraud_recovery_rate": 0.9
+    }
+  }
+}

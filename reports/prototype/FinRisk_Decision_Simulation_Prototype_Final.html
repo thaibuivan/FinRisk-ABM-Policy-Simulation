@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinRisk Decision Simulation Prototype</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-soft: #eef4fb;
+      --ink: #111827;
+      --muted: #607089;
+      --line: #d9e2ee;
+      --blue: #2563eb;
+      --teal: #0f9f6e;
+      --amber: #d97706;
+      --red: #dc2626;
+      --violet: #6d5bd0;
+      --slate: #334155;
+      --shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      background: linear-gradient(135deg, #111827 0%, #1e3a5f 55%, #0f766e 100%);
+      color: white;
+      padding: 34px 40px 30px;
+    }
+    .wrap {
+      width: min(1240px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 28px;
+      align-items: end;
+    }
+    h1 {
+      margin: 0;
+      font-size: 31px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 10px 0 0;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.55;
+      max-width: 860px;
+    }
+    .hero-card {
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.10);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .hero-card .label {
+      color: rgba(255,255,255,0.70);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .hero-card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    main { padding: 26px 0 40px; }
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+    .section-lead {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .flow-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 118px;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+      position: relative;
+    }
+    .flow-card span {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .flow-card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+    .flow-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 7px;
+    }
+    select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fff;
+    }
+    .kpi .name {
+      color: #718096;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .kpi .value {
+      font-size: 25px;
+      font-weight: 800;
+      margin: 8px 0 4px;
+      line-height: 1.2;
+    }
+    .kpi .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fff;
+      min-height: 340px;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+    .chart-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+    svg { width: 100%; height: auto; display: block; }
+    .axis, .tick { stroke: #d7dee8; stroke-width: 1; }
+    .chart-label { fill: #516178; font-size: 12px; }
+    .chart-small { fill: #718096; font-size: 11px; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+    .insight {
+      border-left: 4px solid var(--blue);
+      background: #f8fbff;
+      padding: 16px 18px;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+    .insight p { margin: 0 0 10px; }
+    .insight p:last-child { margin-bottom: 0; }
+    .formula {
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: "Times New Roman", serif;
+      text-align: center;
+      font-size: 19px;
+      line-height: 1.65;
+      margin-top: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 9px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    th {
+      color: #52627a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 11px;
+      background: #f8fafc;
+    }
+    tr.selected {
+      background: #eef5ff;
+      font-weight: 700;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tag {
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+    .note {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #7c2d12;
+      border-radius: 8px;
+      padding: 13px 15px;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+    .sensitivity {
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .sensitivity-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .sensitivity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .range-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #ffffff;
+    }
+    .range-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .range-head strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .sensitivity-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+    .read-guide {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .guide-item {
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .guide-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    @media (max-width: 980px) {
+      .hero, .two-col, .controls, .kpi-grid, .grid-5, .read-guide, .sensitivity-grid {
+        grid-template-columns: 1fr;
+      }
+      header { padding: 28px 22px; }
+      .wrap { width: min(100% - 28px, 1240px); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <div>
+        <h1>Mô phỏng đa tác nhân và thiết kế cơ chế trong ra quyết định rủi ro giao dịch số</h1>
+        <p class="subtitle">
+          Prototype này minh họa cách chuyển từ “mô hình chấm điểm rủi ro” sang “cơ chế ra quyết định”: giao dịch được sinh theo kịch bản,
+          hệ thống tạo risk score, policy quyết định case nào cần review, analyst xử lý trong giới hạn capacity, sau đó đo outcome/KPI.
+        </p>
+      </div>
+      <div class="hero-card">
+        <div class="label">Mục tiêu mô phỏng</div>
+        <strong>Đánh giá trade-off chính sách</strong>
+        <div>Không tối ưu một chỉ số đơn lẻ, mà so sánh lợi ích ròng, recall, precision, workload và chi phí friction.</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section">
+      <h2>1. Framework tư duy</h2>
+      <p class="section-lead">
+        Dữ liệu trong prototype là synthetic simulation được hiệu chỉnh từ các bộ dữ liệu tham khảo. Trọng tâm không phải khẳng định dữ liệu giống hoàn toàn thị trường thật,
+        mà là tạo một môi trường đủ kiểm soát để thử cơ chế phản ứng khi fraud rate, chi phí và analyst capacity thay đổi.
+      </p>
+      <div class="grid-5">
+        <div class="flow-card"><span>1</span><h3>Agents</h3><p>Khách hàng bình thường, tác nhân rủi ro, hệ thống scoring, analyst và policy maker.</p></div>
+        <div class="flow-card"><span>2</span><h3>Transactions</h3><p>Luồng giao dịch có amount, merchant, timing, velocity và hành vi lịch sử.</p></div>
+        <div class="flow-card"><span>3</span><h3>Risk score</h3><p>Score là tín hiệu ưu tiên review, không phải quyết định gian lận cuối cùng.</p></div>
+        <div class="flow-card"><span>4</span><h3>Policy</h3><p>Cơ chế chọn approve, review hoặc escalate dựa trên threshold và capacity.</p></div>
+        <div class="flow-card"><span>5</span><h3>Outcome</h3><p>Đo fraud loss prevented, false positive cost, analyst cost, overflow và net benefit.</p></div>
+      </div>
+      <div class="formula">
+        U<sub>platform</sub> =
+        fraud loss prevented
+        − false positive cost
+        − analyst cost
+        − customer friction cost
+        − overflow penalty
+      </div>
+      <div class="read-guide">
+        <div class="guide-item"><strong>Scenario</strong>Chọn bối cảnh thị trường: ít rủi ro, baseline, stress fraud hoặc giới hạn capacity.</div>
+        <div class="guide-item"><strong>Policy</strong>Chọn cơ chế ra quyết định: threshold chặt/lỏng, top percentile hoặc hybrid escalation.</div>
+        <div class="guide-item"><strong>KPI</strong>So sánh net benefit, recall, precision và workload thay vì chỉ nhìn accuracy.</div>
+        <div class="guide-item"><strong>Trade-off</strong>Policy tốt là policy cân bằng phát hiện rủi ro, chi phí false positive và năng lực analyst.</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. Điều khiển kịch bản</h2>
+      <p class="section-lead">
+        Chọn một bối cảnh mô phỏng để xem policy nào tạo lợi ích ròng tốt hơn. Đây là cách prototype trả lời câu hỏi:
+        nếu môi trường thay đổi, cơ chế ra quyết định có còn hợp lý không?
+      </p>
+      <div class="controls">
+        <div><label for="scenarioSelect">Scenario lens</label><select id="scenarioSelect"></select></div>
+        <div><label for="capacitySelect">Analyst capacity</label><select id="capacitySelect"></select></div>
+        <div><label for="costSelect">Cost assumption</label><select id="costSelect"></select></div>
+        <div><label for="policySelect">Selected policy</label><select id="policySelect"></select></div>
+      </div>
+      <div class="sensitivity">
+        <div class="sensitivity-title">What-if sensitivity analysis</div>
+        <div class="sensitivity-grid">
+          <div class="range-box">
+            <div class="range-head"><strong>Fraud pressure</strong><span id="fraudPressureValue">1.00x</span></div>
+            <input id="fraudPressure" type="range" min="0.5" max="3" step="0.05" value="1" />
+          </div>
+          <div class="range-box">
+            <div class="range-head"><strong>Daily review capacity</strong><span id="dailyCapacityValue">100/day</span></div>
+            <input id="dailyCapacity" type="range" min="10" max="160" step="5" value="100" />
+          </div>
+          <div class="range-box">
+            <div class="range-head"><strong>False positive cost</strong><span id="falsePositiveCostValue">1.00x</span></div>
+            <input id="falsePositiveCost" type="range" min="0.5" max="3" step="0.05" value="1" />
+          </div>
+          <div class="range-box">
+            <div class="range-head"><strong>Recovery rate</strong><span id="recoveryRateValue">50%</span></div>
+            <input id="recoveryRate" type="range" min="0.2" max="0.9" step="0.01" value="0.5" />
+          </div>
+        </div>
+        <div class="sensitivity-note">
+          Các thanh trượt dùng để thử phản ứng của cơ chế trên cùng bộ kết quả baseline. Đây là sensitivity analysis,
+          không phải chạy lại toàn bộ mô phỏng hay huấn luyện lại mô hình.
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="name">Scenario net benefit</div><div class="value" id="scenarioBenefit">-</div><div class="hint" id="scenarioHint">Tổng lợi ích mô phỏng theo scenario.</div></div>
+        <div class="kpi"><div class="name">Best policy</div><div class="value" id="bestPolicy">-</div><div class="hint" id="bestPolicyHint">Policy có net benefit cao nhất trong cấu hình hiện tại.</div></div>
+        <div class="kpi"><div class="name">Selected recall</div><div class="value" id="selectedRecall">-</div><div class="hint">Tỷ lệ fraud được đưa vào review trong policy đang chọn.</div></div>
+        <div class="kpi"><div class="name">Workload / overflow</div><div class="value" id="selectedWorkload">-</div><div class="hint" id="selectedOverflow">Áp lực lên analyst capacity.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. Kết quả mô phỏng</h2>
+      <p class="section-lead">
+        Các biểu đồ bên dưới giúp đọc nhanh trade-off thay vì chỉ nhìn bảng số. Điểm tốt không nhất thiết là policy có recall cao nhất,
+        mà là policy cân bằng được phát hiện rủi ro, chi phí false positive và năng lực xử lý.
+      </p>
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-title">Net benefit theo scenario</div>
+          <div class="chart-subtitle">So sánh lợi ích ròng khi môi trường có fraud rate hoặc capacity khác nhau.</div>
+          <div id="scenarioBars"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Trade-off policy</div>
+          <div class="chart-subtitle">Trục ngang là recall reviewed, trục dọc là net benefit; kích thước điểm thể hiện số alert gửi cho analyst.</div>
+          <div id="tradeoffChart"></div>
+          <div class="legend" id="tradeoffLegend"></div>
+        </div>
+      </div>
+      <div class="two-col" style="margin-top:16px;">
+        <div class="chart-card">
+          <div class="chart-title">Workload funnel</div>
+          <div class="chart-subtitle">Từ alerts sang reviewed và overflow, thể hiện tác động của capacity constraint.</div>
+          <div id="workloadBars"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Payoff decomposition</div>
+          <div class="chart-subtitle">Phân rã lợi ích và chi phí của policy đang chọn.</div>
+          <div id="payoffBars"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4. Diễn giải nhanh</h2>
+      <div class="insight" id="insightPanel"></div>
+      <div class="note">
+        Lưu ý: đây là prototype mô phỏng cho đề án học thuật. Các kết quả phụ thuộc vào giả định về phân phối giao dịch, cost parameters,
+        capacity và policy threshold. Khi có dữ liệu thực, cần hiệu chỉnh lại phân phối, payoff và kiểm định độ nhạy trước khi dùng để ra quyết định.
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. Bảng so sánh policy</h2>
+      <p class="section-lead">
+        Bảng này giữ lại số liệu chi tiết để đối chiếu với biểu đồ. Dòng được tô nền là policy đang chọn.
+      </p>
+      <div id="policyTable"></div>
+      <div class="tags" id="sourceTags"></div>
+    </section>
+  </main>
+
+  <script id="payload" type="application/json">{"scenario": [{"scenario": "low_fraud", "description": "Low fraud environment calibrated near very rare fraud datasets.", "customers": 1000, "days": 30, "configured_fraud_rate": 0.0015, "analyst_capacity_per_day": 100, "transactions": 28042.0, "fraud_count": 47.0, "fraud_rate": 0.001676, "alerts_sent_to_analyst": 867.0, "analyst_reviewed": 867.0, "review_overflow": 0.0, "precision_flagged": 0.0208, "recall_flagged": 0.383, "false_positive_rate": 0.0303, "fraud_loss_prevented": 10718.79, "fraud_loss_realized": 3049.17, "false_positive_cost": 5981.24, "analyst_cost": 2835.38, "net_benefit": -1147.0, "run_dir": "D:\\Đề án\\FinRisk-Decision-Simulation\\data\\simulation_runs\\low_fraud_20260721_093743"}, {"scenario": "baseline", "description": "Reference environment for policy comparison.", "customers": 1000, "days": 30, "configured_fraud_rate": 0.01, "analyst_capacity_per_day": 100, "transactions": 27720.0, "fraud_count": 295.0, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884.0, "analyst_reviewed": 884.0, "review_overflow": 0.0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "false_positive_rate": 0.0283, "fraud_loss_prevented": 79815.84, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.89, "analyst_cost": 2896.08, "net_benefit": 52233.6, "run_dir": "D:\\Đề án\\FinRisk-Decision-Simulation\\data\\simulation_runs\\baseline_20260721_094112"}, {"scenario": "stress_fraud", "description": "Stress scenario with elevated fraud pressure.", "customers": 1000, "days": 30, "configured_fraud_rate": 0.03, "analyst_capacity_per_day": 100, "transactions": 28333.0, "fraud_count": 857.0, "fraud_rate": 0.030247, "alerts_sent_to_analyst": 1027.0, "analyst_reviewed": 1027.0, "review_overflow": 0.0, "precision_flagged": 0.3009, "recall_flagged": 0.3606, "false_positive_rate": 0.0261, "fraud_loss_prevented": 247481.21, "fraud_loss_realized": 52692.78, "false_positive_cost": 5494.2, "analyst_cost": 3494.7, "net_benefit": 185799.53, "run_dir": "D:\\Đề án\\FinRisk-Decision-Simulation\\data\\simulation_runs\\stress_fraud_20260721_094457"}, {"scenario": "low_capacity", "description": "Same generated environment as baseline but analyst capacity is strongly constrained.", "customers": 1000, "days": 30, "configured_fraud_rate": 0.01, "analyst_capacity_per_day": 20, "transactions": 27720.0, "fraud_count": 295.0, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884.0, "analyst_reviewed": 595.0, "review_overflow": 289.0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "false_positive_rate": 0.0283, "fraud_loss_prevented": 67373.77, "fraud_loss_realized": 35597.67, "false_positive_cost": 5677.89, "analyst_cost": 2093.25, "net_benefit": 24004.96, "run_dir": "D:\\Đề án\\FinRisk-Decision-Simulation\\data\\simulation_runs\\low_capacity_20260721_100124"}, {"scenario": "high_capacity", "description": "Same generated environment as baseline with higher analyst capacity.", "customers": 1000, "days": 30, "configured_fraud_rate": 0.01, "analyst_capacity_per_day": 200, "transactions": 27720.0, "fraud_count": 295.0, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884.0, "analyst_reviewed": 884.0, "review_overflow": 0.0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "false_positive_rate": 0.0283, "fraud_loss_prevented": 79815.84, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.89, "analyst_cost": 2896.08, "net_benefit": 52233.6, "run_dir": "D:\\Đề án\\FinRisk-Decision-Simulation\\data\\simulation_runs\\high_capacity_20260721_100541"}], "policies": {"capacity_100": [{"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 884, "review_overflow": 0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1233, "recall_reviewed": 0.3695, "fraud_loss_prevented": 79815.8, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.74, "analyst_cost": 2941.65, "net_benefit": 52188.14, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 54234.31, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 411, "review_overflow": 0, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1873, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1664.55, "net_benefit": 16114.78, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 54234.31, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 10105, "analyst_reviewed": 3000, "review_overflow": 7105, "precision_flagged": 0.0231, "recall_flagged": 0.7898, "precision_reviewed": 0.0517, "recall_reviewed": 0.5254, "fraud_loss_prevented": 88025.55, "fraud_loss_realized": 8061.94, "false_positive_cost": 44530.88, "analyst_cost": 8654.85, "net_benefit": 26777.88, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 884, "review_overflow": 0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1233, "recall_reviewed": 0.3695, "fraud_loss_prevented": 79815.8, "fraud_loss_realized": 19008.27, "false_positive_cost": 11355.48, "analyst_cost": 2941.65, "net_benefit": 46510.4, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 18765.0, "analyst_cost": 4996.35, "net_benefit": 44851.81, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 411, "review_overflow": 0, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1873, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 5329.49, "analyst_cost": 1664.55, "net_benefit": 13450.04, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 18765.0, "analyst_cost": 4996.35, "net_benefit": 44851.81, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 7646, "analyst_reviewed": 3000, "review_overflow": 4646, "precision_flagged": 0.0279, "recall_flagged": 0.722, "precision_reviewed": 0.052, "recall_reviewed": 0.5288, "fraud_loss_prevented": 88076.84, "fraud_loss_realized": 7993.55, "false_positive_cost": 71071.66, "analyst_cost": 8654.85, "net_benefit": 356.78, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 884, "review_overflow": 0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1233, "recall_reviewed": 0.3695, "fraud_loss_prevented": 79815.8, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.74, "analyst_cost": 5883.3, "net_benefit": 49246.49, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 9992.7, "net_benefit": 49237.96, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 411, "review_overflow": 0, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1873, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 3329.1, "net_benefit": 14450.23, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 83161.07, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 9992.7, "net_benefit": 49237.96, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 7822, "analyst_reviewed": 3000, "review_overflow": 4822, "precision_flagged": 0.0275, "recall_flagged": 0.7288, "precision_reviewed": 0.0517, "recall_reviewed": 0.5254, "fraud_loss_prevented": 88025.55, "fraud_loss_realized": 8061.94, "false_positive_cost": 36345.07, "analyst_cost": 17309.7, "net_benefit": 26308.84, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 884, "review_overflow": 0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1233, "recall_reviewed": 0.3695, "fraud_loss_prevented": 42568.43, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.74, "analyst_cost": 2941.65, "net_benefit": 14940.77, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 44352.57, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 15425.81, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 411, "review_overflow": 0, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1873, "recall_reviewed": 0.261, "fraud_loss_prevented": 33342.5, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1664.55, "net_benefit": -13059.9, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 44352.57, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 15425.81, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 6590, "analyst_reviewed": 3000, "review_overflow": 3590, "precision_flagged": 0.0308, "recall_flagged": 0.6881, "precision_reviewed": 0.052, "recall_reviewed": 0.5288, "fraud_loss_prevented": 46974.32, "fraud_loss_realized": 7993.55, "false_positive_cost": 31657.88, "analyst_cost": 8654.85, "net_benefit": -1331.96, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 884, "review_overflow": 0, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1233, "recall_reviewed": 0.3695, "fraud_loss_prevented": 95778.96, "fraud_loss_realized": 19008.27, "false_positive_cost": 5677.74, "analyst_cost": 2941.65, "net_benefit": 68151.3, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 99793.29, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 70866.52, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 411, "review_overflow": 0, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1873, "recall_reviewed": 0.261, "fraud_loss_prevented": 75020.62, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1664.55, "net_benefit": 28618.22, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 1645, "review_overflow": 0, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.0833, "recall_reviewed": 0.4644, "fraud_loss_prevented": 99793.29, "fraud_loss_realized": 14547.91, "false_positive_cost": 9382.5, "analyst_cost": 4996.35, "net_benefit": 70866.52, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 11418, "analyst_reviewed": 3000, "review_overflow": 8418, "precision_flagged": 0.0211, "recall_flagged": 0.8169, "precision_reviewed": 0.0517, "recall_reviewed": 0.5254, "fraud_loss_prevented": 105630.66, "fraud_loss_realized": 8061.94, "false_positive_cost": 49150.67, "analyst_cost": 8654.85, "net_benefit": 39763.2, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}], "capacity_20": [{"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 595, "review_overflow": 289, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1546, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 5677.74, "analyst_cost": 2157.3, "net_benefit": 24295.57, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": 20577.31, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 408, "review_overflow": 3, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1887, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1652.4, "net_benefit": 16126.93, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": 20577.31, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "base_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 10105, "analyst_reviewed": 600, "review_overflow": 9505, "precision_flagged": 0.0231, "recall_flagged": 0.7898, "precision_reviewed": 0.1317, "recall_reviewed": 0.2678, "fraud_loss_prevented": 77287.9, "fraud_loss_realized": 22378.81, "false_positive_cost": 44530.88, "analyst_cost": 1995.3, "net_benefit": 8382.91, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 595, "review_overflow": 289, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1546, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 11355.48, "analyst_cost": 2157.3, "net_benefit": 18617.83, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 18765.0, "analyst_cost": 2170.8, "net_benefit": 11194.81, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 408, "review_overflow": 3, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1887, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 5329.49, "analyst_cost": 1652.4, "net_benefit": 13462.19, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 18765.0, "analyst_cost": 2170.8, "net_benefit": 11194.81, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_false_positive_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 7646, "analyst_reviewed": 600, "review_overflow": 7046, "precision_flagged": 0.0279, "recall_flagged": 0.722, "precision_reviewed": 0.1317, "recall_reviewed": 0.2678, "fraud_loss_prevented": 77287.9, "fraud_loss_realized": 22378.81, "false_positive_cost": 71071.66, "analyst_cost": 1998.0, "net_benefit": -18160.57, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 6.0, "false_positive_variable_rate": 0.02, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 595, "review_overflow": 289, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1546, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 5677.74, "analyst_cost": 4314.6, "net_benefit": 22138.27, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 4341.6, "net_benefit": 18406.51, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 408, "review_overflow": 3, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1887, "recall_reviewed": 0.261, "fraud_loss_prevented": 62517.18, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 3304.8, "net_benefit": 14474.53, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 67525.69, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 4341.6, "net_benefit": 18406.51, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_analyst_cost", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 7822, "analyst_reviewed": 600, "review_overflow": 7222, "precision_flagged": 0.0275, "recall_flagged": 0.7288, "precision_reviewed": 0.1317, "recall_reviewed": 0.2678, "fraud_loss_prevented": 77287.9, "fraud_loss_realized": 22378.81, "false_positive_cost": 36345.07, "analyst_cost": 3990.6, "net_benefit": 14573.41, "fraud_recovery_rate": 0.75, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.9}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 595, "review_overflow": 289, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1546, "recall_reviewed": 0.3119, "fraud_loss_prevented": 36013.7, "fraud_loss_realized": 35395.08, "false_positive_cost": 5677.74, "analyst_cost": 2157.3, "net_benefit": -7216.42, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 36013.7, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": -10934.68, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 408, "review_overflow": 3, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1887, "recall_reviewed": 0.261, "fraud_loss_prevented": 33342.5, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1652.4, "net_benefit": -13047.75, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 36013.7, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": -10934.68, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "low_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 6590, "analyst_reviewed": 600, "review_overflow": 5990, "precision_flagged": 0.0308, "recall_flagged": 0.6881, "precision_reviewed": 0.1317, "recall_reviewed": 0.2678, "fraud_loss_prevented": 41220.21, "fraud_loss_realized": 22378.81, "false_positive_cost": 31657.88, "analyst_cost": 1998.0, "net_benefit": -14814.48, "fraud_recovery_rate": 0.4, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "balanced_threshold", "policy_description": "Baseline threshold: review score >=70, simulated hold/step-up score >=90.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 884, "analyst_reviewed": 595, "review_overflow": 289, "precision_flagged": 0.1233, "recall_flagged": 0.3695, "precision_reviewed": 0.1546, "recall_reviewed": 0.3119, "fraud_loss_prevented": 81030.83, "fraud_loss_realized": 35395.08, "false_positive_cost": 5677.74, "analyst_cost": 2157.3, "net_benefit": 37800.71, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "sensitive_threshold", "policy_description": "Lower threshold: review score >=50, designed to improve recall but may increase false positives.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 81030.83, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": 34082.45, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "strict_threshold", "policy_description": "Higher threshold: review score >=85, designed to reduce workload and false positives.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 411, "analyst_reviewed": 408, "review_overflow": 3, "precision_flagged": 0.1873, "recall_flagged": 0.261, "precision_reviewed": 0.1887, "recall_reviewed": 0.261, "fraud_loss_prevented": 75020.62, "fraud_loss_realized": 42073.1, "false_positive_cost": 2664.75, "analyst_cost": 1652.4, "net_benefit": 28630.37, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "capacity_aware", "policy_description": "Capacity-aware queue: candidates score >=50 are ranked by risk score; only daily capacity is reviewed.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 1645, "analyst_reviewed": 600, "review_overflow": 1045, "precision_flagged": 0.0833, "recall_flagged": 0.4644, "precision_reviewed": 0.1533, "recall_reviewed": 0.3119, "fraud_loss_prevented": 81030.83, "fraud_loss_realized": 35395.08, "false_positive_cost": 9382.5, "analyst_cost": 2170.8, "net_benefit": 34082.45, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}, {"policy_name": "cost_sensitive", "policy_description": "Cost-sensitive queue: review only when expected review utility is positive, then rank by expected utility.", "cost_scenario": "high_recovery", "transactions": 27720, "fraud_count": 295, "fraud_rate": 0.010642, "alerts_sent_to_analyst": 11418, "analyst_reviewed": 600, "review_overflow": 10818, "precision_flagged": 0.0211, "recall_flagged": 0.8169, "precision_reviewed": 0.1317, "recall_reviewed": 0.2678, "fraud_loss_prevented": 92745.48, "fraud_loss_realized": 22378.81, "false_positive_cost": 49150.67, "analyst_cost": 1995.3, "net_benefit": 19220.69, "fraud_recovery_rate": 0.9, "false_positive_fixed_cost": 3.0, "false_positive_variable_rate": 0.01, "analyst_cost_per_minute": 0.45}]}, "sources": {"scenario": "scenario_comparison_20260721_100604.csv", "capacity_100": "policy_comparison_20260721_110505.csv", "capacity_20": "policy_comparison_20260721_110642.csv"}}</script>
+  <script>
+    const DATA = JSON.parse(document.getElementById('payload').textContent);
+
+    const scenarioSelect = document.getElementById('scenarioSelect');
+    const capacitySelect = document.getElementById('capacitySelect');
+    const costSelect = document.getElementById('costSelect');
+    const policySelect = document.getElementById('policySelect');
+    const fraudPressure = document.getElementById('fraudPressure');
+    const dailyCapacity = document.getElementById('dailyCapacity');
+    const falsePositiveCost = document.getElementById('falsePositiveCost');
+    const recoveryRate = document.getElementById('recoveryRate');
+    const fraudPressureValue = document.getElementById('fraudPressureValue');
+    const dailyCapacityValue = document.getElementById('dailyCapacityValue');
+    const falsePositiveCostValue = document.getElementById('falsePositiveCostValue');
+    const recoveryRateValue = document.getElementById('recoveryRateValue');
+
+    const colors = ['#2563eb', '#0f9f6e', '#d97706', '#dc2626', '#6d5bd0', '#334155'];
+    const policyLabels = {
+      threshold_60: 'Threshold 60',
+      threshold_70: 'Threshold 70',
+      threshold_80: 'Threshold 80',
+      top_percentile_10: 'Top 10%',
+      top_percentile_20: 'Top 20%',
+      hybrid_escalation: 'Hybrid escalation'
+    };
+    const scenarioLabels = {
+      low_fraud: 'Low fraud',
+      baseline: 'Baseline',
+      stress_fraud: 'Stress fraud',
+      low_capacity: 'Low capacity',
+      high_capacity: 'High capacity'
+    };
+    const costLabels = {
+      base_cost: 'Base cost',
+      high_false_positive_cost: 'High false positive cost',
+      high_analyst_cost: 'High analyst cost',
+      low_recovery: 'Low recovery',
+      high_recovery: 'High recovery'
+    };
+    const capacityLabels = {
+      capacity_100: '100 reviews/day',
+      capacity_20: '20 reviews/day'
+    };
+
+    function value(row, key, fallback = 0) {
+      const v = Number(row?.[key]);
+      return Number.isFinite(v) ? v : fallback;
+    }
+    function fmtNum(n, digits = 0) {
+      return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+    }
+    function fmtMoney(n) {
+      const abs = Math.abs(Number(n || 0));
+      const sign = Number(n || 0) < 0 ? '-' : '';
+      return sign + '$' + abs.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+    function fmtPct(n) {
+      return (Number(n || 0) * 100).toFixed(2) + '%';
+    }
+    function labelPolicy(name) { return policyLabels[name] || String(name || '-').replaceAll('_', ' '); }
+    function labelScenario(name) { return scenarioLabels[name] || String(name || '-').replaceAll('_', ' '); }
+    function labelCost(name) { return costLabels[name] || String(name || '-').replaceAll('_', ' '); }
+
+    function capacityRows() {
+      const capData = DATA.policies?.[capacitySelect.value];
+      if (Array.isArray(capData)) return capData;
+      if (capData && typeof capData === 'object') return Object.values(capData).flat();
+      return [];
+    }
+    function costKeysForCapacity() {
+      const capData = DATA.policies?.[capacitySelect.value];
+      if (Array.isArray(capData)) {
+        return [...new Set(capData.map(row => row.cost_scenario).filter(Boolean))];
+      }
+      if (capData && typeof capData === 'object') return Object.keys(capData);
+      return [];
+    }
+    function sensitivityValues() {
+      return {
+        fraudPressure: Number(fraudPressure.value || 1),
+        dailyCapacity: Number(dailyCapacity.value || 100),
+        falsePositiveCost: Number(falsePositiveCost.value || 1),
+        recoveryRate: Number(recoveryRate.value || 0.5)
+      };
+    }
+    function updateSensitivityLabels() {
+      const s = sensitivityValues();
+      fraudPressureValue.textContent = s.fraudPressure.toFixed(2) + 'x';
+      dailyCapacityValue.textContent = fmtNum(s.dailyCapacity) + '/day';
+      falsePositiveCostValue.textContent = s.falsePositiveCost.toFixed(2) + 'x';
+      recoveryRateValue.textContent = Math.round(s.recoveryRate * 100) + '%';
+    }
+    function adjustPolicyRow(row) {
+      const s = sensitivityValues();
+      const scenario = selectedScenario();
+      const days = Math.max(1, value(scenario, 'days', 30));
+      const alerts = value(row, 'alerts_sent_to_analyst');
+      const capacityTotal = s.dailyCapacity * days;
+      const analystReviewed = Math.min(alerts, capacityTotal);
+      const reviewRatio = alerts > 0 ? analystReviewed / alerts : 1;
+      const reviewOverflow = Math.max(0, alerts - analystReviewed);
+
+      const baseRecovery = Math.min(0.99, Math.max(0.01, value(row, 'fraud_recovery_rate', 0.5)));
+      const recoveryScale = s.recoveryRate / baseRecovery;
+      const unrealizedScale = (1 - s.recoveryRate) / Math.max(0.01, 1 - baseRecovery);
+      const precisionFlagged = Math.min(1, value(row, 'precision_flagged', value(row, 'precision_reviewed')) * s.fraudPressure);
+      const recallReviewed = Math.min(1, value(row, 'recall_flagged', value(row, 'recall_reviewed')) * reviewRatio);
+      const precisionReviewed = Math.min(1, precisionFlagged);
+
+      const fraudLossPrevented = value(row, 'fraud_loss_prevented') * s.fraudPressure * recoveryScale * reviewRatio;
+      const fraudLossRealized = value(row, 'fraud_loss_realized') * s.fraudPressure * unrealizedScale;
+      const falsePositiveCostAdjusted = value(row, 'false_positive_cost') * s.falsePositiveCost * reviewRatio;
+      const analystCost = value(row, 'analyst_cost') * reviewRatio;
+      const customerFrictionCost = value(row, 'customer_friction_cost', 0) * s.falsePositiveCost * reviewRatio;
+      const overflowPenalty = reviewOverflow * 5;
+      const netBenefit = fraudLossPrevented - falsePositiveCostAdjusted - analystCost - customerFrictionCost - overflowPenalty;
+
+      return {
+        ...row,
+        analyst_reviewed: analystReviewed,
+        review_overflow: reviewOverflow,
+        precision_reviewed: precisionReviewed,
+        recall_reviewed: recallReviewed,
+        fraud_loss_prevented: fraudLossPrevented,
+        fraud_loss_realized: fraudLossRealized,
+        false_positive_cost: falsePositiveCostAdjusted,
+        analyst_cost: analystCost,
+        customer_friction_cost: customerFrictionCost,
+        overflow_penalty: overflowPenalty,
+        net_benefit: netBenefit
+      };
+    }
+    function policyRows() {
+      const capData = DATA.policies?.[capacitySelect.value];
+      const rows = Array.isArray(capData)
+        ? capData.filter(row => String(row.cost_scenario || '') === String(costSelect.value))
+        : (capData?.[costSelect.value] || []);
+      return rows.map(adjustPolicyRow);
+    }
+    function selectedScenario() {
+      return DATA.scenario.find(row => row.scenario === scenarioSelect.value) || DATA.scenario[0] || {};
+    }
+    function selectedRow() {
+      const rows = policyRows();
+      return rows.find(row => row.policy_name === policySelect.value) || rows[0] || {};
+    }
+    function bestRow(rows) {
+      return rows.reduce((best, row) => value(row, 'net_benefit') > value(best, 'net_benefit') ? row : best, rows[0] || {});
+    }
+    function setOptions(select, entries) {
+      select.innerHTML = entries.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+    }
+    function initControls() {
+      setOptions(scenarioSelect, DATA.scenario.map(row => [row.scenario, labelScenario(row.scenario)]));
+      setOptions(capacitySelect, Object.keys(DATA.policies || {}).map(k => [k, capacityLabels[k] || k]));
+      setOptions(costSelect, costKeysForCapacity().map(k => [k, labelCost(k)]));
+      setOptions(policySelect, policyRows().map(row => [row.policy_name, labelPolicy(row.policy_name)]));
+    }
+
+    function updateDependentOptions() {
+      const oldCost = costSelect.value;
+      const oldPolicy = policySelect.value;
+      setOptions(costSelect, costKeysForCapacity().map(k => [k, labelCost(k)]));
+      if ([...costSelect.options].some(o => o.value === oldCost)) costSelect.value = oldCost;
+      setOptions(policySelect, policyRows().map(row => [row.policy_name, labelPolicy(row.policy_name)]));
+      if ([...policySelect.options].some(o => o.value === oldPolicy)) policySelect.value = oldPolicy;
+    }
+
+    function renderKpis(rows) {
+      const sc = selectedScenario();
+      const sel = selectedRow();
+      const best = bestRow(rows);
+      document.getElementById('scenarioBenefit').textContent = fmtMoney(value(sc, 'net_benefit'));
+      document.getElementById('scenarioHint').textContent = `${fmtNum(value(sc, 'transactions'))} transactions, fraud rate ${fmtPct(value(sc, 'fraud_rate'))}.`;
+      document.getElementById('bestPolicy').textContent = labelPolicy(best.policy_name);
+      document.getElementById('bestPolicyHint').textContent = `Net benefit ${fmtMoney(value(best, 'net_benefit'))}.`;
+      document.getElementById('selectedRecall').textContent = fmtPct(value(sel, 'recall_reviewed'));
+      document.getElementById('selectedWorkload').textContent = `${fmtNum(value(sel, 'analyst_reviewed'))} / ${fmtNum(value(sel, 'review_overflow'))}`;
+      document.getElementById('selectedOverflow').textContent = 'Reviewed / overflow under selected policy.';
+    }
+
+    function barSvg(items, opts) {
+      const width = 540, height = opts.height || 260;
+      const left = 66, right = 18, top = 20, bottom = 54;
+      const plotW = width - left - right, plotH = height - top - bottom;
+      const values = items.map(d => d.value);
+      const min = Math.min(0, ...values);
+      const max = Math.max(1, ...values);
+      const range = max - min || 1;
+      const zeroY = top + plotH - ((0 - min) / range) * plotH;
+      const band = plotW / Math.max(1, items.length);
+      const bars = items.map((d, i) => {
+        const x = left + i * band + band * 0.18;
+        const w = band * 0.64;
+        const y = top + plotH - ((d.value - min) / range) * plotH;
+        const h = Math.max(2, Math.abs(zeroY - y));
+        const yy = d.value >= 0 ? y : zeroY;
+        return `<rect x="${x}" y="${yy}" width="${w}" height="${h}" rx="5" fill="${d.color || opts.color || '#2563eb'}"></rect>
+          <text x="${x + w/2}" y="${height - 24}" text-anchor="middle" class="chart-label">${d.label}</text>
+          <text x="${x + w/2}" y="${yy - 7}" text-anchor="middle" class="chart-small">${d.display}</text>`;
+      }).join('');
+      const ticks = [0, 0.5, 1].map(t => {
+        const v = min + t * range;
+        const y = top + plotH - ((v - min) / range) * plotH;
+        return `<line x1="${left}" x2="${width-right}" y1="${y}" y2="${y}" class="tick"></line>
+          <text x="${left-8}" y="${y+4}" text-anchor="end" class="chart-small">${opts.money ? fmtMoney(v) : fmtNum(v)}</text>`;
+      }).join('');
+      return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${opts.label || 'bar chart'}">
+        ${ticks}
+        <line x1="${left}" x2="${width-right}" y1="${zeroY}" y2="${zeroY}" class="axis"></line>
+        ${bars}
+      </svg>`;
+    }
+
+    function renderScenarioBars() {
+      const items = DATA.scenario.map((row, i) => ({
+        label: labelScenario(row.scenario),
+        value: value(row, 'net_benefit'),
+        display: fmtMoney(value(row, 'net_benefit')),
+        color: colors[i % colors.length]
+      }));
+      document.getElementById('scenarioBars').innerHTML = barSvg(items, { money: true, label: 'Net benefit by scenario' });
+    }
+
+    function renderTradeoff(rows) {
+      const width = 620, height = 292;
+      const left = 78, right = 70, top = 34, bottom = 58;
+      const plotW = width - left - right, plotH = height - top - bottom;
+      const xRawMax = Math.max(0.01, ...rows.map(r => value(r, 'recall_reviewed')));
+      const maxX = xRawMax * 1.14;
+      const ys = rows.map(r => value(r, 'net_benefit'));
+      const minY = Math.min(0, ...ys);
+      const maxY = Math.max(1, ...ys) * 1.12;
+      const rangeY = maxY - minY || 1;
+      const maxAlerts = Math.max(1, ...rows.map(r => value(r, 'alerts_sent_to_analyst')));
+      const yTicks = [0, 0.5, 1].map(t => minY + t * rangeY);
+      const grid = yTicks.map(tick => {
+        const y = top + plotH - ((tick - minY) / rangeY) * plotH;
+        return `<line x1="${left}" x2="${width-right}" y1="${y}" y2="${y}" class="tick"></line>
+          <text x="${left-10}" y="${y+4}" text-anchor="end" class="chart-small">${fmtMoney(tick)}</text>`;
+      }).join('');
+      const selected = rows.find(r => r.policy_name === policySelect.value) || rows[0] || {};
+      const best = bestRow(rows);
+      const points = rows.map((r, i) => {
+        const radius = Math.min(18, 6 + (value(r, 'alerts_sent_to_analyst') / maxAlerts) * 11);
+        const x0 = left + (value(r, 'recall_reviewed') / maxX) * plotW;
+        const y0 = top + plotH - ((value(r, 'net_benefit') - minY) / rangeY) * plotH;
+        const x = Math.max(left + radius + 2, Math.min(width - right - radius - 2, x0));
+        const y = Math.max(top + radius + 2, Math.min(height - bottom - radius - 2, y0));
+        const isSelected = r.policy_name === policySelect.value;
+        const isBest = r.policy_name === best.policy_name;
+        const stroke = isSelected ? '#111827' : (isBest ? '#0f9f6e' : 'white');
+        const strokeWidth = isSelected ? 3 : (isBest ? 2 : 1);
+        return `<circle cx="${x}" cy="${y}" r="${radius}" fill="${colors[i % colors.length]}" opacity="${isSelected ? 0.96 : 0.70}" stroke="${stroke}" stroke-width="${strokeWidth}">
+          <title>${labelPolicy(r.policy_name)} | recall ${fmtPct(value(r, 'recall_reviewed'))} | precision ${fmtPct(value(r, 'precision_reviewed'))} | alerts ${fmtNum(value(r, 'alerts_sent_to_analyst'))} | net benefit ${fmtMoney(value(r, 'net_benefit'))}</title>
+        </circle>`;
+      }).join('');
+      const sxRaw = left + (value(selected, 'recall_reviewed') / maxX) * plotW;
+      const syRaw = top + plotH - ((value(selected, 'net_benefit') - minY) / rangeY) * plotH;
+      const sx = Math.max(left + 24, Math.min(width - right - 24, sxRaw));
+      const sy = Math.max(top + 24, Math.min(height - bottom - 24, syRaw));
+      const labelX = Math.min(width - right - 120, sx + 18);
+      const labelY = Math.max(top + 18, sy - 20);
+      document.getElementById('tradeoffChart').innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Policy trade-off chart">
+        ${grid}
+        <line x1="${left}" x2="${width-right}" y1="${height-bottom}" y2="${height-bottom}" class="axis"></line>
+        <line x1="${left}" x2="${left}" y1="${top}" y2="${height-bottom}" class="axis"></line>
+        <text x="${left}" y="${height-19}" class="chart-label">Recall reviewed</text>
+        <text x="${left}" y="${top-12}" class="chart-label">Net benefit</text>
+        <text x="${left}" y="${height-bottom+18}" class="chart-small">0%</text>
+        <text x="${width-right}" y="${height-bottom+18}" text-anchor="end" class="chart-small">${fmtPct(xRawMax)}</text>
+        ${points}
+        <line x1="${sx}" y1="${sy}" x2="${labelX-6}" y2="${labelY+4}" stroke="#94a3b8" stroke-width="1"></line>
+        <rect x="${labelX}" y="${labelY-13}" width="118" height="27" rx="6" fill="#ffffff" stroke="#d9e2ee"></rect>
+        <text x="${labelX+8}" y="${labelY+4}" class="chart-small">${labelPolicy(selected.policy_name)}</text>
+      </svg>`;
+      document.getElementById('tradeoffLegend').innerHTML = rows.map((r, i) => `<span><span class="dot" style="background:${colors[i % colors.length]}"></span>${labelPolicy(r.policy_name)}</span>`).join('');
+    }
+
+    function renderWorkloadBars() {
+      const sel = selectedRow();
+      const items = [
+        { label: 'Alerts', value: value(sel, 'alerts_sent_to_analyst'), display: fmtNum(value(sel, 'alerts_sent_to_analyst')), color: '#2563eb' },
+        { label: 'Reviewed', value: value(sel, 'analyst_reviewed'), display: fmtNum(value(sel, 'analyst_reviewed')), color: '#0f9f6e' },
+        { label: 'Overflow', value: value(sel, 'review_overflow'), display: fmtNum(value(sel, 'review_overflow')), color: '#dc2626' }
+      ];
+      document.getElementById('workloadBars').innerHTML = barSvg(items, { label: 'Workload funnel', height: 250 });
+    }
+
+    function renderPayoffBars() {
+      const sel = selectedRow();
+      const items = [
+        { label: 'Prevented', value: value(sel, 'fraud_loss_prevented'), display: fmtMoney(value(sel, 'fraud_loss_prevented')), color: '#0f9f6e' },
+        { label: 'FP cost', value: -value(sel, 'false_positive_cost'), display: '-' + fmtMoney(value(sel, 'false_positive_cost')), color: '#d97706' },
+        { label: 'Analyst', value: -value(sel, 'analyst_cost'), display: '-' + fmtMoney(value(sel, 'analyst_cost')), color: '#6d5bd0' },
+        { label: 'Friction', value: -value(sel, 'customer_friction_cost'), display: '-' + fmtMoney(value(sel, 'customer_friction_cost')), color: '#dc2626' },
+        { label: 'Net', value: value(sel, 'net_benefit'), display: fmtMoney(value(sel, 'net_benefit')), color: '#2563eb' }
+      ];
+      document.getElementById('payoffBars').innerHTML = barSvg(items, { money: true, label: 'Payoff decomposition', height: 250 });
+    }
+
+    function renderTable(rows) {
+      const htmlRows = rows.map(r => `<tr class="${r.policy_name === policySelect.value ? 'selected' : ''}">
+        <td>${labelPolicy(r.policy_name)}</td>
+        <td>${fmtNum(value(r, 'alerts_sent_to_analyst'))}</td>
+        <td>${fmtNum(value(r, 'analyst_reviewed'))}</td>
+        <td>${fmtNum(value(r, 'review_overflow'))}</td>
+        <td>${fmtPct(value(r, 'precision_reviewed'))}</td>
+        <td>${fmtPct(value(r, 'recall_reviewed'))}</td>
+        <td>${fmtMoney(value(r, 'false_positive_cost'))}</td>
+        <td>${fmtMoney(value(r, 'net_benefit'))}</td>
+      </tr>`).join('');
+      document.getElementById('policyTable').innerHTML = `<table>
+        <thead><tr><th>Policy</th><th>Alerts</th><th>Reviewed</th><th>Overflow</th><th>Precision</th><th>Recall</th><th>FP cost</th><th>Net benefit</th></tr></thead>
+        <tbody>${htmlRows}</tbody>
+      </table>`;
+    }
+
+    function renderInsight(rows) {
+      const sc = selectedScenario();
+      const sel = selectedRow();
+      const best = bestRow(rows);
+      const overflow = value(sel, 'review_overflow');
+      const isBest = sel.policy_name === best.policy_name;
+      document.getElementById('insightPanel').innerHTML = `
+        <p>Trong scenario ${labelScenario(sc.scenario)}, dữ liệu mô phỏng có ${fmtNum(value(sc, 'transactions'))} giao dịch và fraud rate ${fmtPct(value(sc, 'fraud_rate'))}. Đây là bối cảnh để đánh giá policy, không phải dữ liệu giao dịch thật.</p>
+        <p>Policy đang chọn là ${labelPolicy(sel.policy_name)} với ${capacityLabels[capacitySelect.value]} và giả định chi phí ${labelCost(costSelect.value)}. Policy này đạt recall ${fmtPct(value(sel, 'recall_reviewed'))}, precision ${fmtPct(value(sel, 'precision_reviewed'))}, net benefit ${fmtMoney(value(sel, 'net_benefit'))}.</p>
+        <p>${overflow > 0
+          ? `Có ${fmtNum(overflow)} case bị overflow, nghĩa là cơ chế tạo nhiều case hơn năng lực analyst xử lý. Đây là tín hiệu cần điều chỉnh threshold/capacity trước khi triển khai.`
+          : 'Không có overflow trong cấu hình này, nên workload nằm trong khả năng xử lý của analyst.'}</p>
+        <p>${isBest
+          ? 'Policy đang chọn cũng là policy có net benefit cao nhất trong cấu hình hiện tại.'
+          : `Trong cấu hình hiện tại, policy có net benefit cao nhất là ${labelPolicy(best.policy_name)} với ${fmtMoney(value(best, 'net_benefit'))}.`}</p>`;
+    }
+
+    function renderSources() {
+      const sources = DATA.sources || {};
+      document.getElementById('sourceTags').innerHTML = Object.entries(sources)
+        .map(([key, value]) => `<span class="tag">${key}: ${String(value).replace(/^.*[\\\\/]/, '')}</span>`)
+        .join('');
+    }
+
+    function render() {
+      updateSensitivityLabels();
+      updateDependentOptions();
+      const rows = policyRows();
+      renderKpis(rows);
+      renderScenarioBars();
+      renderTradeoff(rows);
+      renderWorkloadBars();
+      renderPayoffBars();
+      renderTable(rows);
+      renderInsight(rows);
+      renderSources();
+    }
+
+    initControls();
+    render();
+    capacitySelect.addEventListener('change', render);
+    costSelect.addEventListener('change', render);
+    scenarioSelect.addEventListener('change', render);
+    policySelect.addEventListener('change', render);
+    [fraudPressure, dailyCapacity, falsePositiveCost, recoveryRate].forEach(el => el.addEventListener('input', render));
+  </script>
+</body>
+</html>

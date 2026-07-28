@@ -1,0 +1,85 @@
+# Python / environments
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Secrets / local configs
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Keep copied legacy app code out of the thesis repo
+backend/
+frontend/
+core_model/
+eval/
+tools/
+
+# Archive and raw/heavy data
+_archive_intermediate_files/
+data/reference/raw/
+data/raw/
+data/model_runs/
+data/simulation_runs/
+
+# Track only lightweight final data outputs
+data/*
+!data/policy_comparisons/
+!data/policy_comparisons/policy_comparison_20260721_110642.csv
+!data/policy_comparisons/policy_comparison_20260721_110642.md
+!data/scenario_comparisons/
+!data/scenario_comparisons/scenario_comparison_20260721_100604.csv
+!data/scenario_comparisons/scenario_comparison_20260721_100604.md
+!data/token_cost_feasibility/
+!data/token_cost_feasibility/token_cost_architecture_comparison.csv
+
+# Ignore all scripts first, then allow selected research scripts
+scripts/*
+!scripts/generate_simulation_data.py
+!scripts/generate_simulation_data_v2.py
+!scripts/generate_simulation_data_v3.py
+!scripts/run_simulation_scenarios.py
+!scripts/run_simulation_scenarios_v2.py
+!scripts/run_simulation_scenarios_v3.py
+!scripts/compare_decision_policies.py
+!scripts/build_analysis_report.py
+!scripts/build_interactive_dashboard.py
+!scripts/train_simulation_risk_model.py
+!scripts/train_simulation_xgboost_model.py
+!scripts/train_simulation_xgboost_optimized.py
+!scripts/train_simulation_xgboost_v4_features_twostage.py
+!scripts/train_simulation_xgboost_v5_true_twostage.py
+!scripts/analyze_v5_twostage_sensitivity.py
+!scripts/analyze_v5_recall_first_operating_points.py
+!scripts/token_cost_feasibility.py
+
+# Reports: keep final/prototype/feasibility, ignore temporary exports
+reports/**/*.tmp
+~$*.docx
+
+# Logs / coverage / build outputs
+logs/
+*.log
+htmlcov/
+.coverage
+coverage.xml
+node_modules/
+.next/
+out/
+*.tsbuildinfo
