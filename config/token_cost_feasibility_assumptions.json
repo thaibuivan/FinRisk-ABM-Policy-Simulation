@@ -1,57 +1,114 @@
 {
-  "created_at": "2026-07-28T17:16:07",
-  "purpose": "Estimate whether LLM or hybrid LLM multi-agent simulation is economically feasible compared with the existing rule-based ABM baseline.",
-  "pricing_source": {
-    "model": "gpt-4o-mini",
-    "input_usd_per_1m_tokens": 0.15,
-    "output_usd_per_1m_tokens": 0.6,
-    "source_url": "https://developers.openai.com/api/docs/models/gpt-4o-mini",
-    "note": "Prices are assumptions for feasibility estimation and should be rechecked before final thesis experiments."
+  "created_at": "2026-07-28T17:43:05",
+  "purpose": "Token-cost and break-even feasibility analysis for extending the current rule-based ABM into hybrid/full LLM multi-agent simulation.",
+  "currency": "USD",
+  "pricing_sources": [
+    {
+      "model": "gpt-4o-mini",
+      "input_usd_per_1m_tokens": 0.15,
+      "cached_input_usd_per_1m_tokens": 0.075,
+      "output_usd_per_1m_tokens": 0.6,
+      "avg_latency_seconds_per_call": 1.2,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-4o-mini",
+      "source_note": "Official OpenAI model page reports text token prices per 1M tokens. Recheck before final thesis experiments."
+    },
+    {
+      "model": "gpt-4o",
+      "input_usd_per_1m_tokens": 2.5,
+      "cached_input_usd_per_1m_tokens": 1.25,
+      "output_usd_per_1m_tokens": 10.0,
+      "avg_latency_seconds_per_call": 2.8,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-4o",
+      "source_note": "Official OpenAI model page reports text token prices per 1M tokens. Recheck before final thesis experiments."
+    }
+  ],
+  "baseline": {
+    "architecture": "rule_based_abm",
+    "policy": "balanced_threshold",
+    "cost_scenario": "base_cost",
+    "policy_net_benefit_usd": 24295.57,
+    "source": "data/policy_comparisons/policy_comparison_20260721_110642.csv"
   },
-  "baseline_policy_net_benefit_usd": 24295.57,
-  "baseline_source": "data/policy_comparisons/policy_comparison_20260721_110642.csv, base_cost balanced_threshold net_benefit",
-  "experiment_design": {
-    "pilot_scenarios": 3,
-    "rounds_per_scenario": 5,
-    "replications": 3,
-    "scale_scenarios": [
-      100,
-      1000
-    ],
-    "note": "calls = scenarios * rounds_per_scenario * replications * llm_agents * calls_per_agent_round"
-  },
+  "experiment_scales": [
+    {
+      "name": "pilot",
+      "scenarios": 3,
+      "rounds_per_scenario": 5,
+      "replications": 3
+    },
+    {
+      "name": "small_thesis_batch",
+      "scenarios": 100,
+      "rounds_per_scenario": 5,
+      "replications": 3
+    },
+    {
+      "name": "medium_thesis_batch",
+      "scenarios": 1000,
+      "rounds_per_scenario": 5,
+      "replications": 3
+    },
+    {
+      "name": "large_research_batch",
+      "scenarios": 10000,
+      "rounds_per_scenario": 5,
+      "replications": 3
+    }
+  ],
+  "cache_ratios": [
+    0.0,
+    0.5,
+    0.8
+  ],
   "architectures": [
     {
       "name": "rule_based_abm",
-      "description": "Current thesis baseline. Agents follow rules/probabilistic behavior. No LLM call.",
+      "description": "Current baseline: agents follow rules/probabilistic behavior. No LLM call.",
       "llm_agents": 0,
       "calls_per_agent_round": 0,
       "avg_input_tokens_per_call": 0,
       "avg_output_tokens_per_call": 0,
-      "expected_policy_improvement_pct": 0.0
+      "expected_policy_improvement_pct_low": 0.0,
+      "expected_policy_improvement_pct_mid": 0.0,
+      "expected_policy_improvement_pct_high": 0.0
     },
     {
-      "name": "hybrid_llm_abm",
-      "description": "Rule-based customer/fraud/system agents; LLM only for analyst and policy-maker interpretation/decision support.",
+      "name": "hybrid_policy_only",
+      "description": "Only a policy-maker LLM summarizes simulation outcomes and selects/justifies policy.",
+      "llm_agents": 1,
+      "calls_per_agent_round": 1,
+      "avg_input_tokens_per_call": 1200,
+      "avg_output_tokens_per_call": 250,
+      "expected_policy_improvement_pct_low": 0.0025,
+      "expected_policy_improvement_pct_mid": 0.01,
+      "expected_policy_improvement_pct_high": 0.03
+    },
+    {
+      "name": "hybrid_analyst_policy",
+      "description": "Rule-based customer/fraud/system agents; LLM analyst and LLM policy-maker interpret cases and policy trade-offs.",
       "llm_agents": 2,
       "calls_per_agent_round": 1,
       "avg_input_tokens_per_call": 1300,
       "avg_output_tokens_per_call": 300,
-      "expected_policy_improvement_pct": 0.03
+      "expected_policy_improvement_pct_low": 0.005,
+      "expected_policy_improvement_pct_mid": 0.02,
+      "expected_policy_improvement_pct_high": 0.05
     },
     {
       "name": "full_llm_abm",
-      "description": "Several agents use LLM reasoning, including customer/fraud/analyst/policy-maker/system narrative agents.",
+      "description": "Several agents use LLM reasoning, including customer, risky actor, analyst, system narrative, and policy-maker agents.",
       "llm_agents": 5,
       "calls_per_agent_round": 1,
       "avg_input_tokens_per_call": 1500,
       "avg_output_tokens_per_call": 350,
-      "expected_policy_improvement_pct": 0.05
+      "expected_policy_improvement_pct_low": 0.005,
+      "expected_policy_improvement_pct_mid": 0.03,
+      "expected_policy_improvement_pct_high": 0.07
     }
   ],
-  "interpretation": {
-    "technical_feasible_if": "Cost per scenario and latency remain small enough to run repeated scenario tests.",
-    "economic_feasible_if": "Expected improvement in policy net benefit is greater than token cost.",
-    "recommended_next_step": "Run a small empirical pilot with API usage logs or LangSmith to replace token assumptions with measured values."
+  "decision_rule": {
+    "technical_feasibility": "Cost per scenario and latency should remain small enough to run repeated scenario tests.",
+    "economic_feasibility": "LLM simulation is feasible only if improvement in policy net benefit exceeds token cost and latency is acceptable.",
+    "recommended_next_step": "Run an empirical API/LangSmith pilot and replace estimated tokens/latency with measured usage."
   }
 }

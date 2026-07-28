@@ -1,0 +1,2 @@
+﻿run_id,scenario,architecture,agent_role,round,model,prompt_tokens,cached_prompt_tokens,completion_tokens,total_tokens,latency_seconds,cost_usd,selected_policy,policy_net_benefit_usd,notes
+pilot_001,baseline,hybrid_analyst_policy,policy_maker,1,gpt-4o-mini,,,,,,,,,Fill from API usage or LangSmith trace after empirical pilot

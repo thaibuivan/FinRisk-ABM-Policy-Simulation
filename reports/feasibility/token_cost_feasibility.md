@@ -1,71 +1,81 @@
-# Token Cost Feasibility for LLM Multi-Agent Simulation
+﻿# Token Cost Feasibility for Hybrid LLM Multi-Agent Simulation
 
-## 1. Mục tiêu
+## 1. Why this analysis matters
 
-Bản đề án hiện tại là rule-based Agent-Based Simulation, gần như không phát sinh token cost. Nếu mở rộng thành khóa luận theo hướng LLM/hybrid multi-agent simulation, cần kiểm tra liệu chi phí token có hợp lý so với giá trị chính sách mà mô phỏng tạo ra hay không.
+The submitted thesis prototype is a rule-based Agent-Based Model (ABM). It does not use LLM tokens. If the thesis is extended toward LLM/hybrid multi-agent simulation, the first question is not whether the API can run, but whether the extra LLM cost and latency are justified by better policy decisions.
 
-Câu hỏi feasibility chính:
+Core feasibility condition:
 
-> LLM/hybrid multi-agent simulation có tạo ra cải thiện đủ lớn trong policy net benefit để bù token cost và latency hay không?
+`LLM simulation net value = improvement in policy net benefit - token cost`
 
-## 2. Kiến trúc so sánh
+The LLM extension is economically feasible only if the improvement in policy net benefit is larger than the token cost, while latency remains acceptable for repeated experiments.
 
-1. Rule-based ABM: baseline hiện tại, không dùng LLM.
-2. Hybrid LLM ABM: customer/fraud/system chạy bằng rule; analyst và policy maker dùng LLM.
-3. Full LLM ABM: nhiều tác nhân dùng LLM để suy luận trong từng vòng mô phỏng.
+## 2. Baseline
 
-## 3. Công thức tính
+- Baseline architecture: `rule_based_abm`
+- Baseline policy: `balanced_threshold`
+- Cost scenario: `base_cost`
+- Baseline policy net benefit: `$24,295.57`
+- Source: `data/policy_comparisons/policy_comparison_20260721_110642.csv`
 
-Token cost:
+This baseline is important because token cost alone does not prove feasibility. We compare token cost against the value of selecting a better policy.
 
-`cost = input_tokens / 1,000,000 * input_price + output_tokens / 1,000,000 * output_price`
+## 3. Model pricing assumptions
 
-Số LLM calls:
+- gpt-4o-mini: input $0.15/1M, cached input $0.075/1M, output $0.6/1M. Source: https://developers.openai.com/api/docs/models/gpt-4o-mini
+- gpt-4o: input $2.5/1M, cached input $1.25/1M, output $10.0/1M. Source: https://developers.openai.com/api/docs/models/gpt-4o
 
-`calls = scenarios * rounds_per_scenario * replications * llm_agents * calls_per_agent_round`
+Prices are current assumptions for feasibility analysis and should be rechecked before final thesis experiments.
 
-Economic feasibility:
+## 4. Architectures compared
 
-`net value = expected policy improvement - token cost`
+- `rule_based_abm`: current baseline, no LLM calls.
+- `hybrid_policy_only`: only the policy-maker uses LLM to interpret simulation outcomes and select/explain policy.
+- `hybrid_analyst_policy`: analyst and policy-maker use LLM; customer/fraud/system behavior remains rule-based.
+- `full_llm_abm`: multiple agents use LLM reasoning.
 
-Trong đó expected policy improvement được tính so với baseline policy net benefit hiện tại: `24295.57` USD.
+## 5. Main estimate: GPT-4o mini with 50% cached input
 
-## 4. Giả định hiện tại
+| scale | architecture | model | llm_calls | total_tokens | token_cost_usd | cost_per_scenario_usd | parallel_by_round_latency_minutes | break_even_improvement_pct_of_baseline_net_benefit |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| pilot | rule_based_abm | gpt-4o-mini | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| pilot | hybrid_policy_only | gpt-4o-mini | 45 | 65250 | 0.012825 | 0.004275 | 0.9 | 5.3e-07 |
+| pilot | hybrid_analyst_policy | gpt-4o-mini | 90 | 144000 | 0.029362 | 0.009787 | 0.9 | 1.21e-06 |
+| pilot | full_llm_abm | gpt-4o-mini | 225 | 416250 | 0.085219 | 0.028406 | 0.9 | 3.51e-06 |
+| small_thesis_batch | rule_based_abm | gpt-4o-mini | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| small_thesis_batch | hybrid_policy_only | gpt-4o-mini | 1500 | 2175000 | 0.4275 | 0.004275 | 30.0 | 1.76e-05 |
+| small_thesis_batch | hybrid_analyst_policy | gpt-4o-mini | 3000 | 4800000 | 0.97875 | 0.009787 | 30.0 | 4.029e-05 |
+| small_thesis_batch | full_llm_abm | gpt-4o-mini | 7500 | 13875000 | 2.840625 | 0.028406 | 30.0 | 0.00011692 |
+| medium_thesis_batch | rule_based_abm | gpt-4o-mini | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| medium_thesis_batch | hybrid_policy_only | gpt-4o-mini | 15000 | 21750000 | 4.275 | 0.004275 | 300.0 | 0.00017596 |
+| medium_thesis_batch | hybrid_analyst_policy | gpt-4o-mini | 30000 | 48000000 | 9.7875 | 0.009787 | 300.0 | 0.00040285 |
+| medium_thesis_batch | full_llm_abm | gpt-4o-mini | 75000 | 138750000 | 28.40625 | 0.028406 | 300.0 | 0.00116919 |
 
-- Model tham chiếu: `gpt-4o-mini`
-- Input price: `0.15` USD / 1M tokens
-- Output price: `0.6` USD / 1M tokens
-- Nguồn giá: https://developers.openai.com/api/docs/models/gpt-4o-mini
-- Pilot: `3` scenarios, `5` rounds/scenario, `3` replications
+## 6. Sensitivity: GPT-4o mini vs GPT-4o at 1,000 scenarios
 
-## 5. Kết quả ước lượng
+| scale | architecture | model | llm_calls | total_tokens | token_cost_usd | cost_per_scenario_usd | parallel_by_round_latency_minutes | break_even_improvement_pct_of_baseline_net_benefit |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| medium_thesis_batch | hybrid_analyst_policy | gpt-4o-mini | 30000 | 48000000 | 9.7875 | 0.009787 | 300.0 | 0.00040285 |
+| medium_thesis_batch | hybrid_analyst_policy | gpt-4o | 30000 | 48000000 | 163.125 | 0.163125 | 700.0 | 0.00671419 |
+| medium_thesis_batch | full_llm_abm | gpt-4o-mini | 75000 | 138750000 | 28.40625 | 0.028406 | 300.0 | 0.00116919 |
+| medium_thesis_batch | full_llm_abm | gpt-4o | 75000 | 138750000 | 473.4375 | 0.473438 | 700.0 | 0.01948658 |
 
-| architecture | scenario_count | llm_calls | total_tokens | token_cost_usd | expected_policy_improvement_usd | net_value_after_token_cost_usd | break_even_improvement_pct |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| rule_based_abm | 3 | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| hybrid_llm_abm | 3 | 90 | 144000 | 0.03375 | 728.87 | 728.83 | 1.39e-06 |
-| full_llm_abm | 3 | 225 | 416250 | 0.097875 | 1214.78 | 1214.68 | 4.03e-06 |
-| rule_based_abm | 100 | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| hybrid_llm_abm | 100 | 3000 | 4800000 | 1.125 | 728.87 | 727.74 | 4.63e-05 |
-| full_llm_abm | 100 | 7500 | 13875000 | 3.2625 | 1214.78 | 1211.52 | 0.00013428 |
-| rule_based_abm | 1000 | 0 | 0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| hybrid_llm_abm | 1000 | 30000 | 48000000 | 11.25 | 728.87 | 717.62 | 0.00046305 |
-| full_llm_abm | 1000 | 75000 | 138750000 | 32.625 | 1214.78 | 1182.15 | 0.00134284 |
+## 7. Interpretation
 
-## 6. Diễn giải ban đầu
+At the current assumed token sizes, GPT-4o mini makes the token cost small even for 1,000 scenarios. The larger concern is not direct token spend, but experiment design quality: whether LLM agents produce better policy selection, more realistic behavioral adaptation, or clearer decision explanations than the rule-based baseline.
 
-Rule-based ABM vẫn là baseline rẻ nhất và phù hợp để chạy nhiều scenario. Full LLM ABM có chi phí cao hơn vì số agent gọi LLM nhiều hơn, nhưng trong cấu hình nhỏ với model rẻ, token cost vẫn chưa phải nút thắt lớn. Tuy nhiên, full LLM có rủi ro latency và độ ổn định cao hơn.
+Full LLM ABM is more expensive and slower because every simulated round requires more LLM calls. The safer research path is hybrid: keep high-volume customer/fraud/system behavior rule-based, and use LLM only for roles where language reasoning is useful, such as analyst interpretation and policy-maker explanation.
 
-Hybrid LLM ABM là hướng hợp lý nhất để kiểm tra tiếp vì chỉ dùng LLM ở nơi cần reasoning/ngôn ngữ tự nhiên: analyst và policy maker. Nếu hybrid giúp chọn policy tốt hơn hoặc giải thích trade-off tốt hơn trong khi chi phí token thấp, đây là hướng khả thi cho khóa luận.
+## 8. What still needs empirical measurement
 
-## 7. Việc cần làm tiếp để kết luận chắc hơn
+This report is still an estimate. To conclude more rigorously, the next step is an empirical pilot with API/LangSmith logs:
 
-1. Chạy empirical pilot bằng API key với khoảng 20-50 LLM calls.
-2. Ghi lại usage thực tế: prompt tokens, completion tokens, cost, latency.
-3. Thay các giả định token/call trong file config bằng số đo thật.
-4. So sánh policy được chọn bởi rule-based baseline và hybrid LLM.
-5. Kết luận theo tiêu chí: `policy improvement > token cost` và latency chấp nhận được.
+1. Run 20-50 LLM calls under the `hybrid_analyst_policy` architecture.
+2. Record prompt tokens, cached tokens, completion tokens, latency, and selected policy.
+3. Replace the estimated token assumptions with measured averages.
+4. Compare whether hybrid LLM selects a policy with higher net benefit than the rule-based baseline.
+5. Conclude feasibility using: `policy improvement > token cost`.
 
-## 8. Kết luận tạm thời
+## 9. Preliminary conclusion
 
-Ở mức ước lượng, hướng hybrid LLM multi-agent simulation có vẻ khả thi hơn full LLM. Tuy nhiên, kết luận cuối cùng cần dựa trên pilot thực nghiệm bằng API/LangSmith để đo token cost và latency thật. Nếu hybrid không cải thiện policy net benefit hoặc insight so với rule-based baseline, LLM chỉ nên dùng ở tầng giải thích/report thay vì đưa vào toàn bộ mô phỏng.
+The estimated cost suggests that hybrid LLM multi-agent simulation is technically affordable, especially with GPT-4o mini. However, the research claim should not be “LLM is cheap, so use it.” The stronger claim is: hybrid LLM is feasible only if it improves policy selection or interpretation enough to exceed its token and latency cost.
