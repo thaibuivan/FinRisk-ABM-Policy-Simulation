@@ -1,0 +1,5 @@
+﻿scenario,round,selected_policy,selected_net_benefit,best_policy,best_net_benefit,regret_vs_best,baseline_policy,baseline_net_benefit,improvement_vs_baseline,token_cost_usd,net_value_vs_baseline_after_token_cost
+baseline,1,balanced_threshold,24295.57,balanced_threshold,24295.57,0.0,balanced_threshold,24295.57,0.0,4.446e-05,-4.4e-05
+baseline,2,balanced_threshold,24295.57,balanced_threshold,24295.57,0.0,balanced_threshold,24295.57,0.0,5.152e-05,-5.2e-05
+stress_fraud,1,strict_threshold,16126.93,balanced_threshold,24295.57,8168.64,balanced_threshold,24295.57,-8168.64,4.946e-05,-8168.640049
+stress_fraud,2,strict_threshold,16126.93,balanced_threshold,24295.57,8168.64,balanced_threshold,24295.57,-8168.64,4.38e-05,-8168.640044

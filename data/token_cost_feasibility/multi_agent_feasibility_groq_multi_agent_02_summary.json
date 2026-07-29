@@ -1,0 +1,23 @@
+{
+  "run_id": "groq_multi_agent_02",
+  "provider": "groq",
+  "model": "llama-3.1-8b-instant",
+  "scenarios": "baseline,stress_fraud",
+  "rounds": 2,
+  "llm_agent_roles": 4,
+  "llm_calls": 16,
+  "successful_calls": 16,
+  "errors": 0,
+  "total_tokens": 13091,
+  "total_cost_usd": 0.0007648,
+  "avg_cost_per_call_usd": 4.78e-05,
+  "avg_latency_seconds_per_call": 2.7759,
+  "policy_decision_count": 4,
+  "exact_best_policy_match_count": 2,
+  "policy_selection_accuracy": 0.5,
+  "avg_regret_vs_best": 4084.32,
+  "best_policy_by_net_benefit": "balanced_threshold",
+  "best_policy_net_benefit": 24295.57,
+  "baseline_policy": "balanced_threshold",
+  "baseline_policy_net_benefit": 24295.57
+}

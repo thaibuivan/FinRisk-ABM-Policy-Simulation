@@ -1,0 +1,7 @@
+﻿experiment,scenario_count,estimated_llm_calls,estimated_token_cost_usd,note
+Hybrid LLM pilot,100,400,0.015472,"same prompts, same roles, same rounds as pilot"
+Hybrid LLM pilot,1000,4000,0.15472,"same prompts, same roles, same rounds as pilot"
+Hybrid LLM pilot,10000,40000,1.5472,"same prompts, same roles, same rounds as pilot"
+Full multi-agent pilot,100,800,0.03824,"same prompts, same roles, same rounds as pilot"
+Full multi-agent pilot,1000,8000,0.3824,"same prompts, same roles, same rounds as pilot"
+Full multi-agent pilot,10000,80000,3.824,"same prompts, same roles, same rounds as pilot"

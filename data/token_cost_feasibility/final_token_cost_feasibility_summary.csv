@@ -1,0 +1,3 @@
+﻿experiment,architecture,provider,model,scenarios,rounds,llm_roles,llm_calls,successful_calls,errors,total_tokens,total_cost_usd,avg_cost_per_call_usd,avg_latency_seconds_per_call,decision_quality_metric,policy_selection_accuracy,avg_regret_vs_best
+Hybrid LLM pilot,hybrid_analyst_policy,groq,llama-3.1-8b-instant,2,2,2,8,8,0,5377,0.00030944,3.868e-05,1.1137,not measured,,
+Full multi-agent pilot,customer + risky actor + analyst + policy maker,groq,llama-3.1-8b-instant,2,2,4,16,16,0,13091,0.0007648,4.78e-05,2.7759,policy_selection_accuracy and regret_vs_best,0.5,4084.32
