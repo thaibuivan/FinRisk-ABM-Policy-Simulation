@@ -1,0 +1,10 @@
+{
+  "llm_calls": 8,
+  "prompt_tokens": 4024,
+  "completion_tokens": 1353,
+  "total_tokens": 5377,
+  "total_cost_usd": 0.00030944,
+  "avg_prompt_tokens_per_call": 503.0,
+  "avg_completion_tokens_per_call": 169.12,
+  "avg_latency_seconds_per_call": 1.1137
+}

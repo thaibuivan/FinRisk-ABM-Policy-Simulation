@@ -4,12 +4,15 @@ import argparse
 import csv
 import json
 import os
+import ssl
 import time
 import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
+
+import certifi
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "token_cost_feasibility_assumptions.json"
@@ -44,11 +47,14 @@ def load_config() -> Dict:
     return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 
 
-def model_pricing(config: Dict, model_name: str) -> Dict:
+def model_pricing(config: Dict, model_name: str, provider: str = "openai") -> Dict:
+    for item in config["pricing_sources"]:
+        if item["model"] == model_name and item.get("provider", "openai") == provider:
+            return item
     for item in config["pricing_sources"]:
         if item["model"] == model_name:
             return item
-    raise ValueError(f"Model pricing not found in config: {model_name}")
+    raise ValueError(f"Model pricing not found in config: {provider}/{model_name}")
 
 
 def estimate_tokens(text: str) -> int:
@@ -145,10 +151,19 @@ Please answer:
 """
 
 
-def call_openai_chat(model: str, user_prompt: str, max_tokens: int, temperature: float) -> Dict[str, object]:
-    api_key = os.environ.get("OPENAI_API_KEY")
+def call_llm_chat(provider: str, model: str, user_prompt: str, max_tokens: int, temperature: float) -> Dict[str, object]:
+    if provider == "openai":
+        api_key = os.environ.get("OPENAI_API_KEY")
+        endpoint = "https://api.openai.com/v1/chat/completions"
+        missing_msg = "OPENAI_API_KEY is not set. Use --dry-run or set the key before live pilot."
+    elif provider == "groq":
+        api_key = os.environ.get("GROQ_API_KEY")
+        endpoint = "https://api.groq.com/openai/v1/chat/completions"
+        missing_msg = "GROQ_API_KEY is not set. Use --dry-run or set the key before live pilot."
+    else:
+        raise ValueError(f"Unsupported provider: {provider}")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set. Use --dry-run or set the key before live pilot.")
+        raise RuntimeError(missing_msg)
 
     payload = {
         "model": model,
@@ -161,23 +176,25 @@ def call_openai_chat(model: str, user_prompt: str, max_tokens: int, temperature:
     }
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        "https://api.openai.com/v1/chat/completions",
+        endpoint,
         data=data,
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "FinRisk-ABM-Policy-Simulation/0.1",
         },
         method="POST",
     )
     started = time.perf_counter()
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        context = ssl.create_default_context(cafile=certifi.where())
+        with urllib.request.urlopen(req, timeout=60, context=context) as resp:
             raw = resp.read().decode("utf-8")
             latency = time.perf_counter() - started
             parsed = json.loads(raw)
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"OpenAI API HTTP {exc.code}: {body}") from exc
+        raise RuntimeError(f"LLM API HTTP {exc.code}: {body}") from exc
 
     usage = parsed.get("usage", {})
     content = parsed.get("choices", [{}])[0].get("message", {}).get("content", "")
@@ -193,7 +210,7 @@ def call_openai_chat(model: str, user_prompt: str, max_tokens: int, temperature:
 
 def run_pilot(args: argparse.Namespace) -> List[Dict[str, object]]:
     config = load_config()
-    pricing = model_pricing(config, args.model)
+    pricing = model_pricing(config, args.model, args.provider)
     scenario_rows = read_csv(SCENARIO_PATH)
     policies = policy_rows(read_csv(POLICY_PATH), args.cost_scenario)
 
@@ -221,7 +238,7 @@ def run_pilot(args: argparse.Namespace) -> List[Dict[str, object]]:
                         response_text = "DRY RUN: no API call. Replace with live output after running without --dry-run."
                     else:
                         try:
-                            result = call_openai_chat(args.model, prompt, args.max_tokens, args.temperature)
+                            result = call_llm_chat(args.provider, args.model, prompt, args.max_tokens, args.temperature)
                             prompt_tokens = int(result["prompt_tokens"])
                             completion_tokens = int(result["completion_tokens"])
                             total_tokens = int(result["total_tokens"])
@@ -239,7 +256,7 @@ def run_pilot(args: argparse.Namespace) -> List[Dict[str, object]]:
                             response_text = ""
                             error = str(exc)
 
-                    cost = token_cost(prompt_tokens, completion_tokens, cached_prompt_tokens, pricing)
+                    cost = 0.0 if error else token_cost(prompt_tokens, completion_tokens, cached_prompt_tokens, pricing)
                     rows.append({
                         "run_id": args.run_id,
                         "dry_run": args.dry_run,
@@ -249,6 +266,7 @@ def run_pilot(args: argparse.Namespace) -> List[Dict[str, object]]:
                         "agent_role": role,
                         "round": round_idx,
                         "replication": replication,
+                        "provider": args.provider,
                         "model": args.model,
                         "prompt_tokens": prompt_tokens,
                         "cached_prompt_tokens": cached_prompt_tokens,
@@ -260,6 +278,8 @@ def run_pilot(args: argparse.Namespace) -> List[Dict[str, object]]:
                         "response_preview": response_text.replace("\n", " ")[:500],
                         "error": error,
                     })
+                    if (not args.dry_run) and args.sleep_seconds > 0:
+                        time.sleep(args.sleep_seconds)
     return rows
 
 
@@ -294,6 +314,7 @@ def write_report(path: Path, rows: List[Dict[str, object]], summary: Dict[str, o
 This pilot measures or dry-runs the token cost of adding LLM agents to the current rule-based ABM thesis framework.
 
 - Architecture: `{args.architecture}`
+- Provider: `{args.provider}`
 - Model: `{args.model}`
 - Dry run: `{args.dry_run}`
 - Scenarios: `{args.scenarios}`
@@ -333,6 +354,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run or dry-run an LLM token cost pilot for FinRisk ABM.")
     parser.add_argument("--run-id", default=datetime.now().strftime("pilot_%Y%m%d_%H%M%S"))
     parser.add_argument("--architecture", choices=["hybrid_policy_only", "hybrid_analyst_policy"], default="hybrid_analyst_policy")
+    parser.add_argument("--provider", choices=["openai", "groq"], default="openai")
     parser.add_argument("--model", default="gpt-4o-mini")
     parser.add_argument("--scenarios", default="baseline,stress_fraud")
     parser.add_argument("--cost-scenario", default="base_cost")
@@ -344,6 +366,7 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=350)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--continue-on-error", action="store_true")
+    parser.add_argument("--sleep-seconds", type=float, default=0.0, help="Sleep after each live API call to reduce rate-limit risk.")
     args = parser.parse_args()
 
     rows = run_pilot(args)

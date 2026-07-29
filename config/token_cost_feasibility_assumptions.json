@@ -20,6 +20,26 @@
       "avg_latency_seconds_per_call": 2.8,
       "source_url": "https://developers.openai.com/api/docs/models/gpt-4o",
       "source_note": "Official OpenAI model page reports text token prices per 1M tokens. Recheck before final thesis experiments."
+    },
+    {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "input_usd_per_1m_tokens": 0.05,
+      "cached_input_usd_per_1m_tokens": 0.05,
+      "output_usd_per_1m_tokens": 0.08,
+      "avg_latency_seconds_per_call": 1.0,
+      "source_url": "https://groq.com/pricing",
+      "source_note": "Groq public pricing page lists Llama 3.1 8B Instant at $0.05 input and $0.08 output per 1M tokens. Free quota/rate limits may apply."
+    },
+    {
+      "provider": "groq",
+      "model": "llama-3.3-70b-versatile",
+      "input_usd_per_1m_tokens": 0.59,
+      "cached_input_usd_per_1m_tokens": 0.59,
+      "output_usd_per_1m_tokens": 0.79,
+      "avg_latency_seconds_per_call": 1.4,
+      "source_url": "https://groq.com/pricing",
+      "source_note": "Groq public pricing page lists Llama 3.3 70B Versatile at $0.59 input and $0.79 output per 1M tokens. Free quota/rate limits may apply."
     }
   ],
   "baseline": {
