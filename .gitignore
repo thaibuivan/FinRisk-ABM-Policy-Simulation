@@ -52,6 +52,8 @@ data/*
 !data/token_cost_feasibility/llm_pilot_usage_template.csv
 !data/token_cost_feasibility/empirical_llm_pilot_*.csv
 !data/token_cost_feasibility/empirical_llm_pilot_*_summary.json
+!data/token_cost_feasibility/multi_agent_feasibility_*.csv
+!data/token_cost_feasibility/multi_agent_feasibility_*_summary.json
 
 # Ignore all scripts first, then allow selected research scripts
 scripts/*
@@ -73,9 +75,11 @@ scripts/*
 !scripts/analyze_v5_recall_first_operating_points.py
 !scripts/token_cost_feasibility.py
 !scripts/run_llm_cost_pilot.py
+!scripts/run_multi_agent_feasibility_pilot.py
 
 # Reports: keep final/prototype/feasibility, ignore temporary exports
 !reports/feasibility/empirical_llm_pilot_*.md
+!reports/feasibility/multi_agent_feasibility_*.md
 reports/**/*.tmp
 ~$*.docx
 
